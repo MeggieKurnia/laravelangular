@@ -9,6 +9,6 @@
 </div>
 <div id="page-inner">
 	<div class="row">
-		<div frm  atr="config"></div>
+		<div frm  atr="config" t="{!! 'dsad' !!}"></div>
 	</div>
 </div>

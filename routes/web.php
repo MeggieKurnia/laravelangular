@@ -14,8 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('admin-cp',function(){
+Route::get('admin-cp/{url?}',function(){
 	return view('vendor.webarq.admin.index');
 });
 Route::post('getactivity','admin\DashboardController@getActivity');
 Route::post('config','admin\ConfigController@createForm');
+Route::post('postCreate','admin\FormController@postCreate');
