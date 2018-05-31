@@ -17,26 +17,11 @@ class ConfigController extends Controller
     		'form'=>[
     			'tes'=>['type'=>'text','title'=>'Title Form','info'=>'tes info'],
     			'tes2'=>['type'=>'textarea','id'=>'tesid'],
-    			'tes3'=>['info'=>'dww'],
-    			'tes4'=>['type'=>'file','accept'=>'image/jpg, image/jpeg, image/png']
+    			'tes3',
+    			'tes4'=>['type'=>'file','accept'=>'image/jpg, image/jpeg, image/png','upload_dir'=>'site/upload']
     		],
-            'table'=>'config'
+            'table'=>'App\Model\ConfigModel|'.__METHOD__
     	];
-    	$d = $this->renderJSON($ret);
-    	return response()->json($d);
-    }
-
-    function renderJSON($arr){
-    	$ret=[];
-    	foreach ($arr['form'] as $key => $value) {
-    		if(is_numeric($key)){
-    			$ret[$value]='';
-    		}else{
-    			$ret[$key] = $value;
-    		}
-    	}
-        if(isset($arr['table']))
-            $ret['t'] = encryptStr($arr['table']);  
-    	return $ret;
+        return renderJSON($ret);
     }
 }

@@ -4,11 +4,11 @@
     </h1>
 	<ol class="breadcrumb">
 	  <li><a href="/admin-cp">System</a></li>
-	  <li class="active">Dashboard</li>
+	  <li class="active">{{ param.params }}</li>
 	</ol> 				
 </div>
 <div id="page-inner">
 	<div class="row">
-		<div frm  atr="config" t="{!! 'dsad' !!}"></div>
+		<div frm  atr="{{ param.params }}"></div>
 	</div>
 </div>

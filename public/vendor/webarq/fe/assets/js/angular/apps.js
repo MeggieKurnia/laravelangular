@@ -5,9 +5,13 @@ app.config(function($routeProvider,$locationProvider) {
         templateUrl : "../view/main.blade.php",
         controller  : "DashboardController"
     })
-    .when("/config", {
-        templateUrl : "../view/config.blade.php",
-        controller  : "ConfigController"
+    .when("/form/:params", {
+        templateUrl : "../view/form.php",
+        controller  : "FormController"
+    })
+     .when("/listing/:params", {
+        templateUrl : "../view/listing.php",
+        controller  : "ListingController"
     })
     .otherwise({
         redirectTo: '/'
@@ -15,17 +19,12 @@ app.config(function($routeProvider,$locationProvider) {
     $locationProvider.html5Mode(true)
     $locationProvider.hashPrefix('');
 });
-app.config(function($interpolateProvider) {
-    $interpolateProvider.startSymbol('{@');
-    $interpolateProvider.endSymbol('@}');
-});
-
 app.service('createForm',function($http){
     this.generate = function(url){
         var r = null;
         $http({
             method:"POST",
-            url:urlapp+"/"+url,
+            url:urlapp+"/form/"+url,
         }).then(function(res){
             return generateForm(res.data);
         });
@@ -39,7 +38,7 @@ app.directive("frm", function($compile,$http) {
         link: function(scope,element, attr){
             $http({
                 method:"POST",
-                url:urlapp+'/'+attr.atr
+                url:urlapp+'/form/'+attr.atr
             }).then(function(res){
                 element.append($compile(generateForm(res.data))(scope));
                 scope.tes=function(r){
@@ -49,6 +48,29 @@ app.directive("frm", function($compile,$http) {
                         headers: {'Content-Type': undefined}
                     });
                 }
+            });
+
+        }
+    }
+});
+
+app.directive('list', function($compile,$http){
+    return {
+        restrict: 'A',
+        scope: true,
+        link: function(scope,element, attr){
+            $http({
+                method:"POST",
+                url:urlapp+'/listing/'+attr.tbl
+            }).then(function(res){
+                element.append($compile(generateTable(res.data))(scope));
+                // scope.tes=function(r){
+                //     var fmdata = new FormData(document.getElementById('frmPost'));
+                //     $http.post("../postCreate", fmdata,{
+                //         transformRequest: angular.identity,
+                //         headers: {'Content-Type': undefined}
+                //     });
+                // }
             });
 
         }
@@ -69,19 +91,13 @@ app.controller('DashboardController', function($scope,$http){
     });
 });
 
-app.controller('ConfigController', function($scope,$http){
-    $scope.tes=function(r){
-       
-        console.log($scope.data);
-        $.ajax({
-            url:"../postCreate",
-            data:{},
-            type:"POST",
-            success:function(){
+app.controller('FormController', function($scope,$routeParams){
+   $scope.param = $routeParams;
+});
 
-            }
-        });
-    }
+app.controller('ListingController', function($scope,$routeParams){
+    console.log($routeParams);
+    $scope.param = $routeParams;
 });
 
 function generateForm(ar){
@@ -91,10 +107,10 @@ function generateForm(ar){
         $.each(ar, function(k,v){
             if(k != 't'){
                 htm+='<div class="form-group">';
-                if(Object.keys(v).length){
+                if(typeof v === 'object'){
                     var attr = '';
                     $.each(v, function(a,b){
-                        if(jQuery.inArray(a.toLowerCase(),["class","title","type","info","accept","t"]) === -1)
+                        if(jQuery.inArray(a.toLowerCase(),["class","title","type","info","accept","t","upload_dir","rules"]) === -1)
                             attr+=a.toLowerCase()+'='+b.trim();
                         if(a == "accept"){
                             var r = b.split(",");
@@ -122,8 +138,8 @@ function generateForm(ar){
                     if(typeof v.type !== "undefined"){
                         if(v.type == "textarea"){
                             htm+='<textarea name="'+k+'" class="form-control '+(typeof v.class !== 'undefined' ? v.class : '')+'" '+attr+'></textarea>';
-                        }else if(v.type == "text"){
-                            htm+='<input type="text" name="'+k+'" class="form-control '+(typeof v.class !== 'undefined' ? v.class : '')+'" '+attr+' />';
+                        }else if(jQuery.inArray(v.type.toLowerCase(),["text","password"]) !== -1){
+                            htm+='<input type="'+v.type+'" name="'+k+'" class="form-control '+(typeof v.class !== 'undefined' ? v.class : '')+'" '+attr+' />';
                         }else if(v.type == "file"){
                             htm+='<input type="file" name="'+k+'" '+attr+' />';
                         }
@@ -132,7 +148,7 @@ function generateForm(ar){
                     }
                 }else{
                     htm+='<label for="'+k+'">'+k+'</label>';
-                    htm+='<input type="text" name="'+k+'" class="form-control '+(typeof v.class !== 'undefined' ? v.class : '')+'"/>';
+                    htm+='<input type="text" name="'+k+'" class="form-control"/>';
                 }
                 if(v.info)
                     htm+='<span class="info">'+v.info+'</span>';
@@ -142,4 +158,37 @@ function generateForm(ar){
         htm+='<button type="button" ng-click="tes(\'#frmPost\')" class="btn btn-primary">Submit</button>';
     htm+='</form>';
     return htm;
+}
+
+function generateTable(arr){
+    if(Object.keys(arr).length){
+        var htm='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
+        htm+='<thead><tr>';
+        $.each(arr, function(k,v){
+            if(k == 0){
+                $.each(v, function(ky,vy){
+                    if(ky != 'id'){
+                        htm+='<th>'+ky+'</th>';
+                    }
+                });
+            }
+        });
+        htm+='</tr></thead><tbody>';
+        $.each(arr, function(k,v){
+            htm+='<tr>';
+                 $.each(v, function(ky,vy){
+                    if(ky != 'id'){
+                        htm+='<td>'+vy+'</td>';
+                    }
+                 });
+            htm+='</tr>';
+        });
+        htm+='</tbody></table>';
+        htm+='<script>'
+                +'$(document).ready(function () {'
+                    +'$("#dataTables-example").dataTable();'
+                +'});'
+            +'</script>';
+        return htm;
+    }
 }

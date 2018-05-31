@@ -16,6 +16,7 @@
     <link href="{{URL::asset('vendor/webarq/fe/assets/js/morris/morris-0.4.3.min.css')}}" rel="stylesheet" />
     <!-- Custom Styles-->
     <link href="{{URL::asset('vendor/webarq/fe/assets/css/custom-styles.css')}}" rel="stylesheet" />
+    <link href="{{URL::asset('vendor/webarq/fe/assets/js/dataTables/dataTables.bootstrap.css')}}" rel="stylesheet" />
     <!-- Google Fonts-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
     <script>
@@ -75,9 +76,12 @@
                                 <a href="/admin-cp">Dashboard</a>
                             </li>
                             <li>
-                                <a href="config">Configuration</a>
+                                <a href="form/config">Configuration</a>
                             </li>
-                            </ul>
+                            <li>
+                                <a href="listing/admin">Admin</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="element"><i class="fa fa-desktop"></i> UI Elements</a>
@@ -146,6 +150,8 @@
     </div>
     <script src="{{URL::asset('vendor/webarq/fe/assets/js/bootstrap.min.js')}}"></script>
     <script src="{{URL::asset('vendor/webarq/fe/assets/js/jquery.metisMenu.js')}}"></script>
+    <script src="{{URL::asset('vendor/webarq/fe/assets/js/dataTables/jquery.dataTables.js')}}"></script>
+    <script src="{{URL::asset('vendor/webarq/fe/assets/js/dataTables/dataTables.bootstrap.js')}}"></script>
     <script src="{{URL::asset('vendor/webarq/fe/assets/js/custom-scripts.js')}}"></script>
 </body>
 

@@ -14,7 +14,7 @@
 		        <div class="panel panel-primary">
 				<div class="number">
 					<h3>
-						<h3>{@ day @}</h3>
+						<h3>{{ day }}</h3>
 						<small>Daily Activity</small>
 					</h3> 
 				</div>
@@ -30,7 +30,7 @@
 		        <div class="panel panel-primary">
 				<div class="number">
 					<h3>
-						<h3>{@ wek @}</h3>
+						<h3>{{ wek }}</h3>
 						<small>Weekly Activity</small>
 					</h3> 
 				</div>
@@ -46,7 +46,7 @@
 		        <div class="panel panel-primary">
 				<div class="number">
 					<h3>
-						<h3>{@ mon @}</h3>
+						<h3>{{ mon }}</h3>
 						<small>Monthly Activity</small>
 					</h3> 
 				</div>
