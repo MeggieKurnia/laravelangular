@@ -20,7 +20,8 @@ Route::get('admin-cp/{url?}/{url2?}',function(){
 });
 Route::post('getactivity','Admin\DashboardController@getActivity');
 // Route::post('config','admin\ConfigController@createForm');
-Route::post('postCreate','admin\FormController@postCreate');
+Route::post('postCreate','Admin\FormController@postCreate');
+Route::post('deleteData','Admin\ListingController@deleteData');
 Route::post('form/{action}',function($action){
 	$ctrl = "App\\Http\\Controllers\\Admin\\".ucfirst($action)."Controller";
 	$class = new $ctrl();

@@ -21,6 +21,6 @@ class AdminController extends Controller
 
     function listing(){
     	$data = new \App\Model\AdminModel();
-    	return $data->get();
+    	return ['data'=>$data->get(),'actions'=>['create','delete','edit']];
     }
 }

@@ -9,6 +9,7 @@
 </div>
 <div id="page-inner">
 	<div class="row">
+		<div ng-if="msg != ''" class="alert alert-success">{{msg}}</div>
 		<div frm  atr="{{ param.params }}"></div>
 	</div>
 </div>

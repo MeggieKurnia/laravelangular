@@ -1,17 +1,21 @@
+var msgsuccess='';
 var app = angular.module("apps", ["ngRoute"]);
 app.config(function($routeProvider,$locationProvider) {
     $routeProvider
     .when("/", {
         templateUrl : "../view/main.blade.php",
-        controller  : "DashboardController"
+        controller  : "DashboardController",
+        cache: false
     })
     .when("/form/:params", {
         templateUrl : "../view/form.php",
-        controller  : "FormController"
+        controller  : "FormController",
+        cache: false
     })
      .when("/listing/:params", {
         templateUrl : "../view/listing.php",
-        controller  : "ListingController"
+        controller  : "ListingController",
+        cache: false
     })
     .otherwise({
         redirectTo: '/'
@@ -31,7 +35,7 @@ app.service('createForm',function($http){
     }
 });
 
-app.directive("frm", function($compile,$http) {
+app.directive("frm", function($compile,$http,$route) {
     return {
         restrict: 'A',
         scope: true,
@@ -46,6 +50,10 @@ app.directive("frm", function($compile,$http) {
                     $http.post("../postCreate", fmdata,{
                         transformRequest: angular.identity,
                         headers: {'Content-Type': undefined}
+                    }).then(function(){
+                        $route.reload();
+                        msgsuccess = "Process Success";
+                        clearMsg();
                     });
                 }
             });
@@ -54,16 +62,57 @@ app.directive("frm", function($compile,$http) {
     }
 });
 
-app.directive('list', function($compile,$http){
+app.directive('list', function($compile,$http,$route,$location){
     return {
         restrict: 'A',
         scope: true,
         link: function(scope,element, attr){
             $http({
                 method:"POST",
-                url:urlapp+'/listing/'+attr.tbl
+                url:urlapp+'/listing/'+attr.cnf
             }).then(function(res){
                 element.append($compile(generateTable(res.data))(scope));
+                var ids = new Array();
+                scope.appnd = function(id){
+                    ids.push(id);
+                }
+                scope.create=function(){
+                    $location.path('/form/'+attr.cnf);
+                }
+                scope.delete = function(){
+                    if(ids.length){
+                        var x = {ids:ids,ctrl:attr.cnf};
+                         $http.post("../deleteData", x).then(function(){
+                            $route.reload();
+                            msgsuccess = "Delete Success";
+                            clearMsg();
+                         });
+                    }else{
+                        alert('Select Data');
+                    }
+                }
+
+                scope.edit=function(){
+                    if(ids.length && ids.length == 1){
+
+                    }else{
+                        alert('Please Select 1 Data');
+                    }
+                }
+
+                scope.selectall=function(){
+                    var e = $("#ca").is(":checked");
+                    if(e){
+                        $(".ck").each(function(){
+                            scope.appnd($(this).val());
+                            $(this).prop("checked",true);
+                        });
+                    }else{
+                        ids=new Array();
+                        $(".ck").prop("checked",false);
+                    }
+                    console.log(ids);
+                }
                 // scope.tes=function(r){
                 //     var fmdata = new FormData(document.getElementById('frmPost'));
                 //     $http.post("../postCreate", fmdata,{
@@ -93,15 +142,15 @@ app.controller('DashboardController', function($scope,$http){
 
 app.controller('FormController', function($scope,$routeParams){
    $scope.param = $routeParams;
+   $scope.msg = msgsuccess;
 });
 
 app.controller('ListingController', function($scope,$routeParams){
-    console.log($routeParams);
     $scope.param = $routeParams;
+    $scope.msg = msgsuccess;
 });
 
 function generateForm(ar){
-    console.log(ar);
     var htm='<form action="postCreate" method="post" enctype="multipart/form-data" id="frmPost">';
         htm+='<input type="hidden" name="t" value="'+ar.t+'">';
         $.each(ar, function(k,v){
@@ -161,10 +210,32 @@ function generateForm(ar){
 }
 
 function generateTable(arr){
-    if(Object.keys(arr).length){
-        var htm='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
+    if(Object.keys(arr.data).length){
+        var htm = '<div class="btn-group" style="margin-bottom:10px;"><button data-toggle="dropdown" class="btn btn-primary dropdown-toggle" aria-expanded="true">Action <span class="caret"></span></button>';
+        if(Object.keys(arr.actions).length){
+            htm+='<ul class="dropdown-menu">';
+            $.each(arr.actions, function(ackey,acval){
+                var a = '';
+                var ac = acval.toLowerCase();
+                if(ac == "delete"){
+                    a='ng-click="delete()"';
+                }else if(ac == "edit"){
+                    a='ng-click="edit()"';
+                }else if(ac == "active"){
+                    a='ng-click="active()"';
+                }else if(ac == "create"){
+                    a='ng-click="create()"';
+                }
+
+                htm+='<li><a href="#" '+a+'>'+ac+'</a></li>';
+            });
+            htm+='</ul>';
+        }
+        htm+='</div>';
+        htm+='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
         htm+='<thead><tr>';
-        $.each(arr, function(k,v){
+        htm+='<th><input type="checkbox" ng-click="selectall()" id="ca" title="Select All"/></th>';
+        $.each(arr.data, function(k,v){
             if(k == 0){
                 $.each(v, function(ky,vy){
                     if(ky != 'id'){
@@ -174,8 +245,9 @@ function generateTable(arr){
             }
         });
         htm+='</tr></thead><tbody>';
-        $.each(arr, function(k,v){
+        $.each(arr.data, function(k,v){
             htm+='<tr>';
+            htm+='<td><input type="checkbox" class="ck" value="'+v.id+'" ng-click="appnd(\''+v.id+'\')"></td>';
                  $.each(v, function(ky,vy){
                     if(ky != 'id'){
                         htm+='<td>'+vy+'</td>';
@@ -184,11 +256,22 @@ function generateTable(arr){
             htm+='</tr>';
         });
         htm+='</tbody></table>';
-        htm+='<script>'
+    }else{
+        var htm='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
+        htm+='<thead><tr><th>Data</th></tr><tbody><tr><td>Not Found</td></tr></tbody>';
+    }
+    htm+='<script>'
                 +'$(document).ready(function () {'
                     +'$("#dataTables-example").dataTable();'
                 +'});'
             +'</script>';
-        return htm;
-    }
+    return htm;
+}
+
+function clearMsg(){
+    setTimeout(function(){
+        if(msgsuccess != ''){
+            msgsuccess='';
+        }
+    },100);
 }
