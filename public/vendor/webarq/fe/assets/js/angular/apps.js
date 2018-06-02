@@ -74,7 +74,18 @@ app.directive('list', function($compile,$http,$route,$location){
                 element.append($compile(generateTable(res.data))(scope));
                 var ids = new Array();
                 scope.appnd = function(id){
-                    ids.push(id);
+                    $(".ck").each(function(){
+                        if($(this).val() == id){
+                            if($(this).is(":checked")){
+                                ids.push(id);
+                            }else{
+                                var index = ids.indexOf(id);
+                                if (index > -1) {
+                                  ids.splice(index, 1);
+                                }
+                            }
+                        }
+                    });
                 }
                 scope.create=function(){
                     $location.path('/form/'+attr.cnf);
@@ -104,22 +115,14 @@ app.directive('list', function($compile,$http,$route,$location){
                     var e = $("#ca").is(":checked");
                     if(e){
                         $(".ck").each(function(){
-                            scope.appnd($(this).val());
                             $(this).prop("checked",true);
+                            scope.appnd($(this).val());
                         });
                     }else{
                         ids=new Array();
                         $(".ck").prop("checked",false);
                     }
-                    console.log(ids);
                 }
-                // scope.tes=function(r){
-                //     var fmdata = new FormData(document.getElementById('frmPost'));
-                //     $http.post("../postCreate", fmdata,{
-                //         transformRequest: angular.identity,
-                //         headers: {'Content-Type': undefined}
-                //     });
-                // }
             });
 
         }
@@ -210,8 +213,7 @@ function generateForm(ar){
 }
 
 function generateTable(arr){
-    if(Object.keys(arr.data).length){
-        var htm = '<div class="btn-group" style="margin-bottom:10px;"><button data-toggle="dropdown" class="btn btn-primary dropdown-toggle" aria-expanded="true">Action <span class="caret"></span></button>';
+     var htm = '<div class="btn-group" style="margin-bottom:10px;"><button data-toggle="dropdown" class="btn btn-primary dropdown-toggle" aria-expanded="true">Action <span class="caret"></span></button>';
         if(Object.keys(arr.actions).length){
             htm+='<ul class="dropdown-menu">';
             $.each(arr.actions, function(ackey,acval){
@@ -232,6 +234,7 @@ function generateTable(arr){
             htm+='</ul>';
         }
         htm+='</div>';
+    if(Object.keys(arr.data).length){
         htm+='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
         htm+='<thead><tr>';
         htm+='<th><input type="checkbox" ng-click="selectall()" id="ca" title="Select All"/></th>';
@@ -257,14 +260,20 @@ function generateTable(arr){
         });
         htm+='</tbody></table>';
     }else{
-        var htm='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
+        htm+='<table class="table table-striped table-bordered table-hover" id="dataTables-example">';
         htm+='<thead><tr><th>Data</th></tr><tbody><tr><td>Not Found</td></tr></tbody>';
     }
-    htm+='<script>'
-                +'$(document).ready(function () {'
-                    +'$("#dataTables-example").dataTable();'
-                +'});'
-            +'</script>';
+    htm+="<script>"
+                +"$(document).ready(function () {"
+                    +"$('#dataTables-example').dataTable({"
+                        +"\"columnDefs\" : [{\"targets\" : 0,\"orderable\" : false}]"
+                    +"});"
+                    +"$('#dataTables-example').on( 'page.dt', function () {"
+                        +"$('.ck').prop('checked',false);"
+                        +"$('#ca').prop('checked',false);"
+                    +"});"
+                +"});"
+            +"</script>";
     return htm;
 }
 

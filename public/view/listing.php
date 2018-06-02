@@ -21,3 +21,8 @@
         </div>
     </div>
 </div>
+<<script type="text/javascript">
+	$(function(){
+		$("#dataTables-example").dataTable();
+	});
+</script>
